@@ -1,0 +1,9 @@
+{
+  "name": "signin-companion",
+  "version": "1.0.0",
+  "description": "signinapp.com API",
+  "main": "dist/index.js",
+  "author": "Andrew Wong",
+  "license": "MIT",
+  "private": true
+}
