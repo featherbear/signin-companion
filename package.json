@@ -5,5 +5,16 @@
   "main": "dist/index.js",
   "author": "Andrew Wong",
   "license": "MIT",
-  "private": true
+  "private": true,
+  "scripts": {
+    "start": "sucrase-node src/index.ts"
+  },
+  "devDependencies": {
+    "@types/node-fetch": "2",
+    "sucrase": "^3.25.0",
+    "typescript": "^4.8.2"
+  },
+  "dependencies": {
+    "node-fetch": "2"
+  }
 }
