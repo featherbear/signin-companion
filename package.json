@@ -7,7 +7,7 @@
   "license": "MIT",
   "private": true,
   "scripts": {
-    "start": "sucrase-node src/index.ts"
+    "start": "sucrase-node test.ts"
   },
   "devDependencies": {
     "@types/node-fetch": "2",

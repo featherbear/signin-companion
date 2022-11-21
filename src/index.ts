@@ -4,11 +4,18 @@ import type { RequestInit } from 'node-fetch'
 const BASE = "https://backend.signinapp.com";
 const UA = "Mozilla/5.0 (Linux; Android 10; SM-G965F Build/QP1A.190711.020; wv) AppleWebKit/537.36 (KHTML, like Gecko) Version/4.0 Chrome/104.0.5112.97 Mobile Safari/537.36 sign-in-app-companion/2.4.8"
 
-
 type Location = { accuracy: number, lat: number, lng: number }
 
-function _fetch(path: string, opts?: Omit<RequestInit, 'body'> & { body?: any }) {
+/**
+ * Google Maps - Satellite View, do it.
+ */
+const defaultLocation: Location = {
+    "accuracy": 50,
+    "lat": -27.96792277746221,
+    "lng": 153.4190704952657
+}
 
+function _fetch(path: string, opts?: Omit<RequestInit, 'body'> & { body?: any }) {
     let headers = {
         'Content-Type': 'application/json'
     }
@@ -28,7 +35,13 @@ function _fetch(path: string, opts?: Omit<RequestInit, 'body'> & { body?: any })
     })
 }
 
-async function connect(code: string): Promise<{ status: boolean, token?: string }> {
+/**
+ * Request a long expiration (1-year) token
+ * 
+ * @param code Connect Code
+ * @returns Token Response
+ */
+export async function connect(code: string): Promise<{ status: boolean, token?: string }> {
     let fetch = _fetch
     return fetch("/api/mobile/connect", {
         method: "POST",
@@ -38,7 +51,10 @@ async function connect(code: string): Promise<{ status: boolean, token?: string 
     }).then(j => j.json())
 }
 
-function withToken(token: string) {
+/**
+ * Provides site functions
+ */
+export function withToken(token: string) {
     let authHeader = {
         Authorization: 'Bearer ' + token,
     }
@@ -54,28 +70,30 @@ function withToken(token: string) {
 
         return j.json()
     })
-    // var fetch = fetch
 
-    // connect('MRYB-LVXR-JLLB')
-
+    /**
+     * Get new access token
+     */
     async function reconnect() {
         return fetch("/api/mobile/reconnect", {
             headers: authHeader
         })
     }
 
-    async function signIn(siteId?: number, location?: Location) {
+    /**
+     * Perform a sign-in  
+     * 
+     * @param siteId You'll probably have to intercept your network requests to find this
+     * @param location 
+     */
+    async function signIn(siteId: number, location?: Location) {
         return fetch("/api/mobile/sign-in", {
             method: "POST",
             headers: authHeader,
             body: {
                 "method": "sign-in",
-                "siteId": siteId ?? 6413,
-                "location": location ?? {
-                    "accuracy": 12.4,
-                    "lat": -33.8847457,
-                    "lng": 151.2102816
-                },
+                "siteId": siteId,
+                "location": location ?? defaultLocation,
                 "messages": [],
                 "personalFields": [],
                 "additional": []
@@ -83,16 +101,16 @@ function withToken(token: string) {
         })
     }
 
+    /**
+     * Perform a sign-out  
+     * @param location 
+     */
     async function signOut(location?: Location) {
         return fetch("/api/mobile/sign-out", {
             method: "POST",
             headers: authHeader,
             body: {
-                location: location ?? {
-                    "accuracy": 13.9,
-                    "lat": -33.8847956,
-                    "lng": 151.2103165
-                },
+                location: location ?? defaultLocation,
                 "additional": []
             }
         })
@@ -101,10 +119,3 @@ function withToken(token: string) {
     return { connect, reconnect, signIn, signOut }
 }
 
-; (async function () {
-    let TOKEN = "..."
-    const fn = withToken(TOKEN)
-    await fn.signIn()
-    console.log(await fn.signOut());
-
-})();
